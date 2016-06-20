@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define BUFSZ 256
+#define BUFSZ 1024
 
-int main(int argc, char **argv)
+int main(int argc, char **argv, char *env[])
 {
 	
 	if (argc <= 1){	// need to pass an argument string to pass from child to parent for part 1
@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 	// error checking
 	if(pid < 0){
 		// error creating fork
-		perror("pipe");
+		perror("fork");
 		exit(EXIT_FAILURE);
 	}
 
@@ -41,10 +41,11 @@ int main(int argc, char **argv)
 		// display value of variable cow
 		printf("child value of cow is %d\n",cow);
 		printf("child writes %s to pipe.\n", argv[1]);
-		write(pfd[1], argv[1], 9);	// write a message from child to pipe
+		write(pfd[1], argv[1], BUFSZ);	// write a message from child to pipe
 		printf("child changes value of cow\n");
 		cow = 1000;	// change value of cow to 1000 in one process
 		printf("child value of cow is %d\n",cow);	// display value of cow in both processes to see they are different
+		exit(EXIT_SUCCESS);
 	}
 	else{	// parent process
 		// display value of variable cow
@@ -53,6 +54,35 @@ int main(int argc, char **argv)
 		read(pfd[0], buffer, BUFSZ);
 		printf("parent reads %s from pipe.\n", buffer);
 		printf("parent value of cow is %d\n",cow);	// verify they are different
+
+
+	}
+
+	// part 2 - execve
+
+	pid = fork();
+
+	// error checking
+	if(pid < 0){
+		// error creating fork
+		perror("fork");
+		exit(EXIT_FAILURE);
+	}
+
+	if (pid ==0){ // child process
+		char * foo[]={"ls",NULL};
+		printf("Child executing ls with execve system call\n");
+		int test = execve("/bin/ls", foo, env);	// using execve system call
+		if (test == 0){	// execve only returns if an error has happened
+			perror("execve");
+			exit(EXIT_FAILURE);
+		}
+	}
+	else{	// parent process
+		printf("Parent waiting for child to terminate\n");
+		wait(0);
+		printf("Children processes terminated\n");
+
 
 	}
 
