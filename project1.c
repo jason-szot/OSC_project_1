@@ -1,3 +1,9 @@
+/********************************************************
+*		Author: Jason Szot								*
+*		Email:  jes130130@utdallas.edu					*
+*		Class:  SE4390.u01 - Operating Systems Concepts	*
+********************************************************/
+
 #include <unistd.h>		// to use system calls:  pid_t fork(void) int execve(const char*, char *const argv[], char *const envp[])
 #include <sys/wait.h>
 #include <sys/types.h>
@@ -72,18 +78,15 @@ int main(int argc, char **argv, char *env[])
 	if (pid ==0){ // child process
 		char * foo[]={"ls",NULL};
 		printf("Child executing ls with execve system call\n");
-		int test = execve("/bin/ls", foo, env);	// using execve system call
-		if (test == 0){	// execve only returns if an error has happened
-			perror("execve");
-			exit(EXIT_FAILURE);
-		}
+		execve("/bin/ls", foo, env);	// using execve system call
+		// execve only returns if an error has happened
+		perror("execve");
+		exit(EXIT_FAILURE);
 	}
 	else{	// parent process
 		printf("Parent waiting for child to terminate\n");
 		wait(0);
 		printf("Children processes terminated\n");
-
-
 	}
 
 	return EXIT_SUCCESS;
